@@ -2,14 +2,12 @@
 #include <math.h>
 #include <iostream>
 
-// ---------- stb_image (header-only, coloque stb_image.h na mesma pasta) ----------
 #define STB_IMAGE_IMPLEMENTATION
 #include "stb_image.h"
 
-// ---------- CONSTANTES ----------
 const float PI = 3.1415926535f;
 
-// ---------- CONTROLE DA CÂMERA ----------
+// Controle da Câmera
 float angleAlpha = 0.0f;
 float angleBeta  = 0.8f;
 float radius     = 55.0f;
@@ -18,15 +16,15 @@ float camTargetX = 0.0f;
 float camTargetY = 0.0f;
 float camTargetZ = 0.0f;
 
-// ---------- CONTROLE DO MOUSE ----------
+// Controle do Mouse
 bool isDragging = false;
 int lastMouseX, lastMouseY;
 
-// ---------- ESTRUTURA DOS PLANETAS ----------
+// Estrutura dos Planetas
 struct Planet {
     float radius;
     float distance;
-    float r, g, b;       // cor de fallback
+    float r, g, b;       // Cor de fallback
     float tilt;
     const char* texFile;
 };
@@ -44,11 +42,11 @@ Planet planets[] = {
 
 int numPlanets = sizeof(planets) / sizeof(Planet);
 
-// ---------- ÍNDICES DE TEXTURA ----------
+// Índices de Textura
 // 0-7: planetas | 8: sol | 9: lua | 10: estrelas | 11: anel de saturno
 GLuint textures[12];
 
-// ---------- CARREGA TEXTURA (JPG ou PNG) ----------
+// Carrega Textura
 GLuint loadTexture(const char* filename, bool hasAlpha = false) {
     int w, h, channels;
     int forceChannels = hasAlpha ? 4 : 3;
@@ -77,7 +75,7 @@ GLuint loadTexture(const char* filename, bool hasAlpha = false) {
     return texID;
 }
 
-// ---------- CONFIGURAÇÃO INICIAL ----------
+// Configuração Inicial
 void init() {
     glClearColor(0.02f, 0.02f, 0.05f, 1.0f);
     glEnable(GL_DEPTH_TEST);
@@ -105,7 +103,7 @@ void init() {
     textures[11] = loadTexture("textures/saturn_ring.png", true); // PNG com canal alpha
 }
 
-// ---------- CÂMERA ----------
+// Câmera
 void updateCamera() {
     if (angleBeta >  1.5f) angleBeta =  1.5f;
     if (angleBeta < -1.5f) angleBeta = -1.5f;
@@ -119,7 +117,7 @@ void updateCamera() {
               0.0f, 1.0f, 0.0f);
 }
 
-// ---------- TECLADO (SETAS) ----------
+// Teclado (setas)
 void specialKeys(int key, int x, int y) {
     float speed  = radius * 0.02f;
     float rightX = cos(angleAlpha);
@@ -134,7 +132,7 @@ void specialKeys(int key, int x, int y) {
     glutPostRedisplay();
 }
 
-// ---------- TECLADO (WASD, ESC, R) ----------
+// Teclado (WASD, ESC, R) 
 void keyboard(unsigned char key, int x, int y) {
     float speed  = radius * 0.02f;
     float rightX = cos(angleAlpha);
@@ -154,7 +152,7 @@ void keyboard(unsigned char key, int x, int y) {
     glutPostRedisplay();
 }
 
-// ---------- MOUSE ----------
+// Mouse
 void mouseMotion(int x, int y) {
     if (isDragging) {
 
@@ -208,11 +206,11 @@ void mouseClick(int button, int state, int x, int y) {
 
 
 
-// ---------- ANIMAÇÃO ----------
+// Animação
 float orbitAngle[8] = {0};      // translação ao redor do sol
 float rotationAngle[8] = {0};   // rotação do planeta
 
-// velocidades aproximadas
+// Velocidades aproximadas
 float orbitSpeed[8] = {
     4.7f, 3.5f, 3.0f, 2.4f,
     1.3f, 1.0f, 0.7f, 0.5f
@@ -227,7 +225,7 @@ float rotationSpeed[8] = {
 float moonOrbit = 0.0f;
 float moonSpeed = 8.0f;
 
-// ---------- ATUALIZA ANIMAÇÃO ----------
+// Atualiza Animação
 void updateAnimation(int value) {
 
     for (int i = 0; i < numPlanets; i++) {
@@ -247,7 +245,7 @@ void updateAnimation(int value) {
     glutTimerFunc(16, updateAnimation, 0);
 }
 
-// ---------- ESFERA TEXTURIZADA ----------
+// Esfera Texturizada
 void drawTexturedSphere(float r, int stacks, int slices) {
     for (int i = 0; i < stacks; i++) {
         float phi0 = PI * (-0.5f + (float)i       / stacks);
@@ -274,7 +272,7 @@ void drawTexturedSphere(float r, int stacks, int slices) {
     }
 }
 
-// ---------- FUNDO ESTRELADO ----------
+// Fundo Estrelado
 void drawStarBackground() {
     float skyRadius = 2000.0f;
 
@@ -315,7 +313,7 @@ void drawStarBackground() {
     glEnable(GL_LIGHTING);
 }
 
-// ---------- LUA (orbita a Terra) ----------
+// Lua
 void drawMoon(float earthRadius) {
     float moonDist   = earthRadius * 1.8f;
     float moonRadius = 0.22f;
@@ -333,7 +331,7 @@ void drawMoon(float earthRadius) {
     glPopMatrix();
 }
 
-// ---------- ANEL DE SATURNO ----------
+// Anel de Saturno
 void drawSaturnRing(float innerRadius, float outerRadius) {
     int segments = 180;
 
@@ -365,7 +363,7 @@ void drawSaturnRing(float innerRadius, float outerRadius) {
     glDisable(GL_BLEND);
 }
 
-// ---------- ÓRBITA ----------
+// Órbita
 void drawOrbit(float distance) {
     glDisable(GL_LIGHTING);
     glDisable(GL_TEXTURE_2D);
@@ -380,7 +378,7 @@ void drawOrbit(float distance) {
     glEnable(GL_TEXTURE_2D);
 }
 
-// ---------- SISTEMA SOLAR ----------
+// Sistema Solar
 void drawSolarSystem() {
     // ----- FUNDO ESTRELADO -----
     drawStarBackground();
@@ -435,7 +433,7 @@ void drawSolarSystem() {
     }
 }
 
-// ---------- DISPLAY ----------
+// Display
 void display() {
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     glLoadIdentity();
@@ -446,7 +444,7 @@ void display() {
     glutSwapBuffers();
 }
 
-// ---------- RESHAPE ----------
+// Reshape
 void reshape(int w, int h) {
     if (h == 0) h = 1;
     glViewport(0, 0, w, h);
@@ -456,7 +454,6 @@ void reshape(int w, int h) {
     glMatrixMode(GL_MODELVIEW);
 }
 
-// ---------- MAIN ----------
 int main(int argc, char** argv) {
     glutInit(&argc, argv);
     glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGB | GLUT_DEPTH);
