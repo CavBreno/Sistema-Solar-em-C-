@@ -1,4 +1,4 @@
-#include <GL/glut.h>
+#include <GL/glut.h> //biblioteca problemática
 #include <math.h>
 #include <iostream>
 
