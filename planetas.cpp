@@ -155,30 +155,96 @@ void keyboard(unsigned char key, int x, int y) {
 }
 
 // ---------- MOUSE ----------
-void mouseClick(int button, int state, int x, int y) {
-    float zoomSpeed = radius * 0.1f;
-    if (zoomSpeed < 1.0f) zoomSpeed = 1.0f;
+void mouseMotion(int x, int y) {
+    if (isDragging) {
 
-    if (button == 3 && state == GLUT_DOWN) radius -= zoomSpeed;
-    if (button == 4 && state == GLUT_DOWN) radius += zoomSpeed;
-    if (radius < 5.0f) radius = 5.0f;
+        float dx = (x - lastMouseX);
+        float dy = (y - lastMouseY);
 
-    if (button == GLUT_LEFT_BUTTON) {
-        isDragging = (state == GLUT_DOWN);
+        float panSpeed = radius * 0.002f;
+
+        float rightX = cos(angleAlpha);
+        float rightZ = -sin(angleAlpha);
+
+        float forwardX = sin(angleAlpha);
+        float forwardZ = cos(angleAlpha);
+
+        camTargetX -= rightX * dx * panSpeed;
+        camTargetZ -= rightZ * dx * panSpeed;
+
+        camTargetY += dy * panSpeed;
+
         lastMouseX = x;
         lastMouseY = y;
+
+        glutPostRedisplay();
     }
+}
+
+void mouseClick(int button, int state, int x, int y) {
+
+    if (button == GLUT_LEFT_BUTTON) {
+
+        if (state == GLUT_DOWN) {
+            isDragging = true;
+            lastMouseX = x;
+            lastMouseY = y;
+        }
+        else if (state == GLUT_UP) {
+            isDragging = false;
+        }
+    }
+
+    // Zoom com scroll
+    if (button == 3) { // scroll up
+        radius *= 0.9f;
+    }
+    if (button == 4) { // scroll down
+        radius *= 1.1f;
+    }
+
     glutPostRedisplay();
 }
 
-void mouseMotion(int x, int y) {
-    if (isDragging) {
-        angleAlpha -= (x - lastMouseX) * 0.005f;
-        angleBeta  += (y - lastMouseY) * 0.005f;
-        lastMouseX = x;
-        lastMouseY = y;
-        glutPostRedisplay();
+
+
+// ---------- ANIMAÇÃO ----------
+float orbitAngle[8] = {0};      // translação ao redor do sol
+float rotationAngle[8] = {0};   // rotação do planeta
+
+// velocidades aproximadas
+float orbitSpeed[8] = {
+    4.7f, 3.5f, 3.0f, 2.4f,
+    1.3f, 1.0f, 0.7f, 0.5f
+};
+
+float rotationSpeed[8] = {
+    6.0f, 4.0f, 7.0f, 5.0f,
+    12.0f, 10.0f, 8.0f, 7.0f
+};
+
+// Lua
+float moonOrbit = 0.0f;
+float moonSpeed = 8.0f;
+
+// ---------- ATUALIZA ANIMAÇÃO ----------
+void updateAnimation(int value) {
+
+    for (int i = 0; i < numPlanets; i++) {
+        orbitAngle[i] += orbitSpeed[i] * 0.02f;
+        rotationAngle[i] += rotationSpeed[i] * 0.5f;
+
+        if (orbitAngle[i] > 360) orbitAngle[i] -= 360;
+        if (rotationAngle[i] > 360) rotationAngle[i] -= 360;
     }
+
+    moonOrbit += moonSpeed * 0.05f;
+    if (moonOrbit > 360) moonOrbit -= 360;
+
+    glutPostRedisplay();
+
+    // chama novamente após 16ms (~60 FPS)
+    glutTimerFunc(16, updateAnimation, 0);
 }
 
 // ---------- ESFERA TEXTURIZADA ----------
@@ -194,13 +260,13 @@ void drawTexturedSphere(float r, int stacks, int slices) {
         for (int j = 0; j <= slices; j++) {
             float theta    = 2.0f * PI * (float)j / slices;
             float cosTheta = cos(theta), sinTheta = sin(theta);
-            float u = (float)j / slices;
+            float u = 1.0f - ((float)j / slices);
 
-            glTexCoord2f(u, (float)(i + 1) / stacks);
+            glTexCoord2f(u, 1.0f - (float)(i + 1) / stacks);
             glNormal3f(cosTheta * cosPhi1, sinPhi1, sinTheta * cosPhi1);
             glVertex3f(r * cosTheta * cosPhi1, r * sinPhi1, r * sinTheta * cosPhi1);
 
-            glTexCoord2f(u, (float)i / stacks);
+            glTexCoord2f(u, 1.0f - (float)i / stacks);
             glNormal3f(cosTheta * cosPhi0, sinPhi0, sinTheta * cosPhi0);
             glVertex3f(r * cosTheta * cosPhi0, r * sinPhi0, r * sinTheta * cosPhi0);
         }
@@ -255,11 +321,15 @@ void drawMoon(float earthRadius) {
     float moonRadius = 0.22f;
 
     glPushMatrix();
+
+        glRotatef(moonOrbit, 0.0f, 1.0f, 0.0f); // órbita
         glTranslatef(moonDist, 0.0f, 0.0f);
+
         glBindTexture(GL_TEXTURE_2D, textures[9]);
         glColor3f(1.0f, 1.0f, 1.0f);
         drawTexturedSphere(moonRadius, 20, 20);
         glBindTexture(GL_TEXTURE_2D, 0);
+
     glPopMatrix();
 }
 
@@ -342,7 +412,10 @@ void drawSolarSystem() {
         // Planeta
         glPushMatrix();
             glRotatef(planets[i].tilt, 0.0f, 0.0f, 1.0f);
+            glRotatef(orbitAngle[i], 0.0f, 1.0f, 0.0f);
             glTranslatef(dist, 0.0f, 0.0f);
+
+            glRotatef(rotationAngle[i], 0.0f, 1.0f, 0.0f); // rotação planeta
 
             glBindTexture(GL_TEXTURE_2D, textures[i]);
             glColor3f(1.0f, 1.0f, 1.0f);
@@ -398,6 +471,7 @@ int main(int argc, char** argv) {
     glutMotionFunc(mouseMotion);
     glutSpecialFunc(specialKeys);
     glutKeyboardFunc(keyboard);
+    glutTimerFunc(16, updateAnimation, 0);
 
     glutMainLoop();
     return 0;
