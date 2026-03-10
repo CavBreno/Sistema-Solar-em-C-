@@ -1,4 +1,4 @@
-#include <GL/glut.h> //biblioteca problemática
+#include <GL/glut.h> 
 #include <math.h>
 #include <iostream>
 
@@ -155,22 +155,13 @@ void keyboard(unsigned char key, int x, int y) {
 // Mouse
 void mouseMotion(int x, int y) {
     if (isDragging) {
-
         float dx = (x - lastMouseX);
         float dy = (y - lastMouseY);
 
-        float panSpeed = radius * 0.002f;
+        float rotationSpeed = 0.005f;
 
-        float rightX = cos(angleAlpha);
-        float rightZ = -sin(angleAlpha);
-
-        float forwardX = sin(angleAlpha);
-        float forwardZ = cos(angleAlpha);
-
-        camTargetX -= rightX * dx * panSpeed;
-        camTargetZ -= rightZ * dx * panSpeed;
-
-        camTargetY += dy * panSpeed;
+        angleAlpha -= dx * rotationSpeed;
+        angleBeta  += dy * rotationSpeed;
 
         lastMouseX = x;
         lastMouseY = y;
@@ -203,8 +194,6 @@ void mouseClick(int button, int state, int x, int y) {
 
     glutPostRedisplay();
 }
-
-
 
 // Animação
 float orbitAngle[8] = {0};      // translação ao redor do sol
@@ -380,10 +369,10 @@ void drawOrbit(float distance) {
 
 // Sistema Solar
 void drawSolarSystem() {
-    // ----- FUNDO ESTRELADO -----
+    // Fundo
     drawStarBackground();
 
-    // ----- SOL -----
+    // Sol
     glPushMatrix();
         GLfloat emission[]   = {1.0f, 0.7f, 0.0f, 1.0f};
         GLfloat noEmission[] = {0.0f, 0.0f, 0.0f, 1.0f};
@@ -397,7 +386,7 @@ void drawSolarSystem() {
         glMaterialfv(GL_FRONT, GL_EMISSION, noEmission);
     glPopMatrix();
 
-    // ----- PLANETAS -----
+    // planetas
     for (int i = 0; i < numPlanets; i++) {
         float dist = planets[i].distance;
 
@@ -420,12 +409,12 @@ void drawSolarSystem() {
             drawTexturedSphere(planets[i].radius, 40, 40);
             glBindTexture(GL_TEXTURE_2D, 0);
 
-            // Lua orbita a Terra (índice 2)
+            // Lua orbita a Terra 
             if (i == 2) {
                 drawMoon(planets[i].radius);
             }
 
-            // Anel de Saturno (índice 5)
+            // Anel de Saturno 
             if (i == 5) {
                 drawSaturnRing(planets[i].radius * 1.3f, planets[i].radius * 2.4f);
             }
