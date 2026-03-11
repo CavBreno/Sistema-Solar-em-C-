@@ -85,7 +85,7 @@ void init() {
     glEnable(GL_TEXTURE_2D);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
-    GLfloat posicaoLuz[]     = {0.0f, 0.0f, 0.0f, 1.0f};
+    GLfloat posicaoLuz[] = {0.0f, 0.0f, 0.0f, 1.0f};
     GLfloat luzAmbiente[] = {0.15f, 0.15f, 0.15f, 1.0f};
     GLfloat luzDifusa[] = {1.0f, 1.0f, 0.95f, 1.0f};
     glLightfv(GL_LIGHT0, GL_POSITION, posicaoLuz);
@@ -105,8 +105,13 @@ void init() {
 
 // Câmera
 void updateCamera() {
-    if (anguloVertical >  1.5f) anguloVertical =  1.5f;
-    if (anguloVertical < -1.5f) anguloVertical = -1.5f;
+    if (anguloVertical >  1.5f)  {
+        anguloVertical =  1.5f;
+    } 
+
+    if (anguloVertical < -1.5f) {
+        anguloVertical = -1.5f;
+    } 
 
     float deslocamentoX = distanciaCamera * cos(anguloVertical) * sin(anguloHorizontal);
     float deslocamentoY = distanciaCamera * sin(anguloVertical);
