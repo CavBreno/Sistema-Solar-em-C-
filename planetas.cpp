@@ -226,8 +226,13 @@ void atualizarAnimacao(int valor) {
         anguloOrbita[i] += velocidadeOrbita[i] * 0.02f;
         anguloRotacao[i] += velocidadeRotacao[i] * 0.5f;
 
-        if (anguloOrbita[i] > 360) anguloOrbita[i] -= 360;
-        if (anguloRotacao[i] > 360) anguloRotacao[i] -= 360;
+        if (anguloOrbita[i] > 360) {
+            anguloOrbita[i] -= 360;
+        } 
+        
+        if (anguloRotacao[i] > 360) {
+            anguloRotacao[i] -= 360;
+        } 
     }
 
     anguloOrbitaLua += velocidadeOrbitaLua * 0.05f;
