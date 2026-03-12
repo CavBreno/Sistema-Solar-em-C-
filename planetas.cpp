@@ -229,14 +229,16 @@ void atualizarAnimacao(int valor) {
         if (anguloOrbita[i] > 360) {
             anguloOrbita[i] -= 360;
         } 
-        
+
         if (anguloRotacao[i] > 360) {
             anguloRotacao[i] -= 360;
         } 
     }
 
     anguloOrbitaLua += velocidadeOrbitaLua * 0.05f;
-    if (anguloOrbitaLua > 360) anguloOrbitaLua -= 360;
+    if (anguloOrbitaLua > 360) {
+        anguloOrbitaLua -= 360;
+    } 
 
     glutPostRedisplay();
 
