@@ -1,3 +1,5 @@
+//Breno Viana Cavalcante, Cauã Carvalho Modesto, Jadson de Souza Silva
+
 #include <GL/glut.h> 
 #include <math.h>
 #include <iostream>
